@@ -1,0 +1,142 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: factory
+    network: "mumbai"
+    source:
+      abi: TokenFactory
+      address: "0xAeb21Aa14AECf19c14Cbd046b1D98257b9453eF7"
+      startBlock: 45185588
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Initialized
+        - LogPlatformAdminChanged
+        - LogPlatformTaxChanged
+        - LogPlatformTreasuryChanged
+        - LogRouteChanged
+        - LogTokenDeployed
+        - LogTokenImplementUpgraded
+        - LogTokenPublished
+        - LogTokenTypeImplAdded
+        - LogTokenUpgradeRejected
+        - LogTokenUpgradeRequested
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+      abis:
+        - name: TokenFactory
+          file: ./abis/TokenFactory.json
+        - name: Token
+          file: ./abis/Token.json
+        - name: BondingSwapCalculator
+          file: ./abis/BondingSwapCalculator.json
+        - name: Timelock
+          file: ./abis/Timelock.json
+      eventHandlers:
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: LogPlatformAdminChanged(address)
+          handler: handleLogPlatformAdminChanged
+        - event: LogPlatformTaxChanged()
+          handler: handleLogPlatformTaxChanged
+        - event: LogPlatformTreasuryChanged(address)
+          handler: handleLogPlatformTreasuryChanged
+        - event: LogRouteChanged(address)
+          handler: handleLogRouteChanged
+        - event: LogTokenDeployed(string,string,uint256,address)
+          handler: handleLogTokenDeployed
+        - event: LogTokenImplementUpgraded(address,string,address)
+          handler: handleLogTokenImplementUpgraded
+        - event: LogBondingCurveTypeImplAdded(string,address)
+          handler: handleLogBondingCurveTypeImplAdded
+        - event: LogTokenTypeImplAdded(string,address)
+          handler: handleLogTokenTypeImplAdded
+        - event: LogTokenUpgradeRejected(address,address,string)
+          handler: handleLogTokenUpgradeRejected
+        - event: LogTokenUpgradeRequested(address,uint256,address,address,bytes)
+          handler: handleLogTokenUpgradeRequested
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+      file: ./src/token-factory.ts
+templates:
+  - kind: ethereum
+    name: token
+    network: "mumbai"
+    source:
+      abi: Token
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - DelegateChanged
+        - DelegateVotesChanged
+        - Initialized
+        - LogBurned
+        - LogCoinMakerChanged
+        - LogDeclareDoomsday
+        - LogDestroyed
+        - LogMetadataChanged
+        - LogMint
+        - LogProjectAdminChanged
+        - LogProjectTaxChanged
+        - LogProjectTreasuryChanged
+        - Paused
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - Transfer
+        - Unpaused
+      abis:
+        - name: Token
+          file: ./abis/Token.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: DelegateChanged(indexed address,indexed address,indexed address)
+          handler: handleDelegateChanged
+        - event: DelegateVotesChanged(indexed address,uint256,uint256)
+          handler: handleDelegateVotesChanged
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: LogBurned(address,uint256,uint256,uint256,uint256)
+          handler: handleLogBurned
+        - event: LogCoinMakerChanged(address,address)
+          handler: handleLogCoinMakerChanged
+        - event: LogDeclareDoomsday(address)
+          handler: handleLogDeclareDoomsday
+        - event: LogDestroyed(address)
+          handler: handleLogDestroyed
+        - event: LogMetadataChanged()
+          handler: handleLogMetadataChanged
+        - event: LogMint(address,uint256,uint256,uint256,uint256)
+          handler: handleLogMint
+        - event: LogProjectAdminChanged(address)
+          handler: handleLogProjectAdminChanged
+        - event: LogProjectTaxChanged()
+          handler: handleLogProjectTaxChanged
+        - event: LogProjectTreasuryChanged(address)
+          handler: handleLogProjectTreasuryChanged
+        - event: Paused(address)
+          handler: handlePaused
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: Unpaused(address)
+          handler: handleUnpaused
+      file: ./src/token.ts

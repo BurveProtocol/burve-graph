@@ -1,0 +1,123 @@
+type CounterEntity @entity {
+  "Counter"
+  id: ID!
+  count: BigDecimal!
+  type: String!
+  timestamp: BigInt!
+}
+
+type PlatformEntity @entity {
+  "Platform"
+  id: ID!
+  net: String!
+  addr: Bytes!
+  admin: Bytes!
+  treasury: Bytes!
+  route: Bytes!
+  mintTax: BigInt!
+  burnTax: BigInt!
+}
+
+type TokenType @entity {
+  id: ID!
+  name: String!
+  impl: Bytes!
+}
+type BondingCurveType @entity {
+  id: ID!
+  name: String!
+  impl: Bytes!
+}
+
+type TokenEntity @entity {
+  "Project Token"
+  id: ID!
+  index: BigInt!
+  net: String!
+  addr: Bytes!
+  factory: Bytes!
+  name: String!
+  symbol: String!
+  metaUri: String!
+  supply: BigDecimal!
+  tokenType: String!
+  bondingCurveType: String!
+  raisingToken: Bytes!
+  params: String!
+  mintTax: BigInt!
+  burnTax: BigInt!
+  paused: Boolean!
+  doomsDays: Boolean!
+  destoryed: Boolean!
+  treasury: Bytes!
+  admin: Bytes!
+  creator: Bytes!
+  marketCap: BigDecimal!
+  currentPrice: BigDecimal!
+  lockValue: BigDecimal!
+  treasuryFee: BigDecimal!
+  memberCount: BigInt!
+  decimal: Int8!
+  baseDecimal: Int8!
+  txCount: BigInt!
+  createTimestamp: BigInt!
+  prices: [Price!] @derivedFrom(field: "token")
+  mintBurnTxs: [MintBurnEntity!] @derivedFrom(field: "token")
+  members: [Member!] @derivedFrom(field: "token")
+}
+
+type TokenUpgradeHistory @entity {
+  id: ID!
+  token: TokenEntity!
+  upgradeTo: Bytes!
+  data: String!
+  timestamp: BigInt!
+  operator: Bytes!
+  tx: Bytes!
+  type: String!
+}
+
+type Price @entity {
+  id: ID!
+  type:String!
+  minPrice: BigDecimal!
+  maxPrice: BigDecimal!
+  openPrice: BigDecimal!
+  closePrice: BigDecimal!
+  tokenTvl: BigDecimal!
+  timestamp: BigInt!
+  # token: Bytes!
+  token: TokenEntity!
+  volume:BigDecimal!
+}
+type Member @entity {
+  id: ID!
+  token: TokenEntity!
+  user: User!
+  ids: [BigInt!]
+  balance: BigDecimal
+}
+
+type User @entity {
+  id: ID!
+  members: [Member!] @derivedFrom(field: "user")
+}
+
+type MintBurnEntity @entity {
+  "Mint Burn Trade(0 mint,1 burn)"
+  id: ID!
+  hash: Bytes!
+  blockNum: BigInt!
+  timestamp: BigInt!
+  direction: Int!
+  from: Bytes!
+  to: Bytes!
+  erc20Amount: BigDecimal!
+  nativeAmount: BigDecimal!
+  platformFee: BigDecimal!
+  projectFee: BigDecimal!
+  price: BigDecimal!
+  tvl: BigDecimal!
+  tradeVolumes: BigDecimal!
+  token: TokenEntity!
+}
