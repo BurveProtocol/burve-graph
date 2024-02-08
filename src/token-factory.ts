@@ -123,9 +123,9 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
   token.create(event.params.deployedAddr);
   let platformEntity = PlatformEntity.load(event.address.toHex())!;
   tokenEntity.factory = event.address;
-  tokenEntity.save();
   platformEntity.save();
   dealTokenMember(tokenEntity, admin, ONE_BI);
+  tokenEntity.save();
 }
 
 export function handleLogTokenImplementUpgraded(event: LogTokenImplementUpgraded): void {
