@@ -7,8 +7,8 @@ dataSources:
     network: "mumbai"
     source:
       abi: TokenFactory
-      address: "0xAeb21Aa14AECf19c14Cbd046b1D98257b9453eF7"
-      startBlock: 45185588
+      address: "0xd48FDFc7378CCD83328803241423B3a8F0bb1688"
+      startBlock: 46051526
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -35,8 +35,6 @@ dataSources:
           file: ./abis/Token.json
         - name: BondingSwapCalculator
           file: ./abis/BondingSwapCalculator.json
-        - name: Timelock
-          file: ./abis/Timelock.json
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized

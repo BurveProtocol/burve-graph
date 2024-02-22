@@ -16,6 +16,7 @@ type PlatformEntity @entity {
   route: Bytes!
   mintTax: BigInt!
   burnTax: BigInt!
+  klines: [String!]
 }
 
 type TokenType @entity {
@@ -79,7 +80,7 @@ type TokenUpgradeHistory @entity {
 
 type Price @entity {
   id: ID!
-  type:String!
+  type: String!
   minPrice: BigDecimal!
   maxPrice: BigDecimal!
   openPrice: BigDecimal!
@@ -88,7 +89,7 @@ type Price @entity {
   timestamp: BigInt!
   # token: Bytes!
   token: TokenEntity!
-  volume:BigDecimal!
+  volume: BigDecimal!
 }
 type Member @entity {
   id: ID!

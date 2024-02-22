@@ -24,7 +24,7 @@ import {
 } from "../generated/schema";
 import { Token } from "../generated/factory/Token";
 import { token } from "../generated/templates";
-import { formatEther, ONE_BI, ZERO_BD, ZERO_BI } from "./const";
+import { formatEther, getTypeFromGap, klines, ONE_BI, ZERO_BD, ZERO_BI } from "./const";
 import { CountAndSave } from "./dealers/counter";
 import { getBondingCurveParams } from "./dealers/bondingcurve";
 import { Timelock as TimelockContract } from "../generated/templates/Timelock/Timelock";
@@ -41,6 +41,12 @@ export function handleInitialized(event: Initialized): void {
   platformEntity.route = factoryAbi.try_getRoute().value;
   platformEntity.mintTax = taxRateResult.value.value0;
   platformEntity.burnTax = taxRateResult.value.value1;
+  const arr: string[] = []
+  for (let i = 0; i < klines.length; i++) {
+    arr.push(getTypeFromGap(u32(klines[i])))
+  }
+
+  platformEntity.klines = arr
   platformEntity.save();
 }
 
