@@ -94,19 +94,6 @@
   },
   {
     "type": "function",
-    "name": "declareDoomsday",
-    "inputs": [
-      {
-        "name": "proxyAddress",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "deployToken",
     "inputs": [
       {
@@ -829,6 +816,57 @@
       },
       {
         "name": "impl",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LogHookBlackListed",
+    "inputs": [
+      {
+        "name": "hook",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LogHookRegistered",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "hook",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LogHookWhiteListed",
+    "inputs": [
+      {
+        "name": "hook",
         "type": "address",
         "indexed": false,
         "internalType": "address"

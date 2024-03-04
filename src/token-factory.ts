@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, dataSource, log } from "@graphprotocol/graph-ts";
+import { Address, Bytes, dataSource } from "@graphprotocol/graph-ts";
 import {
   TokenFactory,
   Initialized,
@@ -13,22 +13,28 @@ import {
   RoleAdminChanged,
   RoleGranted,
   RoleRevoked,
-  LogRouteChanged
+  LogRouteChanged,
+  LogHookWhiteListed,
+  LogHookBlackListed,
+  LogHookRegistered
 } from "../generated/factory/TokenFactory";
 import {
   TokenEntity,
   PlatformEntity,
   BondingCurveType,
   TokenUpgradeHistory,
-  TokenType
+  TokenType,
+  HookEntity,
+  Hook
 } from "../generated/schema";
 import { Token } from "../generated/factory/Token";
+import { Hook as HookContract } from "../generated/factory/Hook";
 import { token } from "../generated/templates";
 import { formatEther, getTypeFromGap, klines, ONE_BI, ZERO_BD, ZERO_BI } from "./const";
 import { CountAndSave } from "./dealers/counter";
 import { getBondingCurveParams } from "./dealers/bondingcurve";
-import { Timelock as TimelockContract } from "../generated/templates/Timelock/Timelock";
 import { dealTokenMember } from "./dealers/member";
+import { store } from "@graphprotocol/graph-ts";
 
 export function handleInitialized(event: Initialized): void {
   let platformEntity = new PlatformEntity(event.address.toHex());
@@ -188,4 +194,31 @@ export function handleRoleAdminChanged(event: RoleAdminChanged): void { }
 
 export function handleRoleGranted(event: RoleGranted): void { }
 
-export function handleRoleRevoked(event: RoleRevoked): void { }
+export function handleRoleRevoked(event: RoleRevoked): void {
+  
+ }
+export function handleLogHookWhiteListed(event: LogHookWhiteListed): void { 
+  let hookCa = HookContract.bind(event.params.hook);
+  let hook = new HookEntity(event.params.hook.toHex());
+  hook.name = hookCa.try_hookName().value;
+  hook.addr = event.params.hook;
+  hook.encoder = hookCa.try_parameterEncoder().value;
+  hook.save();
+}
+
+export function handleLogHookBlackListed(event: LogHookBlackListed): void {
+  store.remove("HookEntity", event.params.hook.toHex());
+ }
+export function handleLogHookRegistered(event: LogHookRegistered): void { 
+  const hookEntity=HookEntity.load(event.params.hook.toHex())
+  if(!hookEntity){
+    return
+  }
+  let hook = new Hook(event.params.token.toHex()+"|"+event.params.hook.toHex());
+  hook.token = event.params.token.toHex()
+  hook.addr = event.params.hook;
+  hook.data = event.params.data;
+  hook.encoder = hookEntity.encoder;
+  hook.name = hookEntity.name;
+  hook.save();
+}

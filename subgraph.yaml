@@ -7,21 +7,21 @@ dataSources:
     network: "mumbai"
     source:
       abi: TokenFactory
-      address: "0xd48FDFc7378CCD83328803241423B3a8F0bb1688"
-      startBlock: 46051526
+      address: "0x67f87631Aa65CFe4E6046B1a409f5e5b2544B883"
+      startBlock: 46635806
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Initialized
+        - LogBondingCurveTypeImplAdded
         - LogPlatformAdminChanged
         - LogPlatformTaxChanged
         - LogPlatformTreasuryChanged
         - LogRouteChanged
         - LogTokenDeployed
         - LogTokenImplementUpgraded
-        - LogTokenPublished
         - LogTokenTypeImplAdded
         - LogTokenUpgradeRejected
         - LogTokenUpgradeRequested
@@ -33,11 +33,21 @@ dataSources:
           file: ./abis/TokenFactory.json
         - name: Token
           file: ./abis/Token.json
+        - name: Hook
+          file: ./abis/Hook.json
         - name: BondingSwapCalculator
           file: ./abis/BondingSwapCalculator.json
       eventHandlers:
         - event: Initialized(uint8)
           handler: handleInitialized
+        - event: LogBondingCurveTypeImplAdded(string,address)
+          handler: handleLogBondingCurveTypeImplAdded
+        - event: LogHookBlackListed(address)
+          handler: handleLogHookBlackListed
+        - event: LogHookWhiteListed(address)
+          handler: handleLogHookWhiteListed
+        - event: LogHookRegistered(address,address,bytes)
+          handler: handleLogHookRegistered
         - event: LogPlatformAdminChanged(address)
           handler: handleLogPlatformAdminChanged
         - event: LogPlatformTaxChanged()
@@ -50,8 +60,6 @@ dataSources:
           handler: handleLogTokenDeployed
         - event: LogTokenImplementUpgraded(address,string,address)
           handler: handleLogTokenImplementUpgraded
-        - event: LogBondingCurveTypeImplAdded(string,address)
-          handler: handleLogBondingCurveTypeImplAdded
         - event: LogTokenTypeImplAdded(string,address)
           handler: handleLogTokenTypeImplAdded
         - event: LogTokenUpgradeRejected(address,address,string)

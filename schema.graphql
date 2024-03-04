@@ -24,6 +24,7 @@ type TokenType @entity {
   name: String!
   impl: Bytes!
 }
+
 type BondingCurveType @entity {
   id: ID!
   name: String!
@@ -63,8 +64,18 @@ type TokenEntity @entity {
   txCount: BigInt!
   createTimestamp: BigInt!
   prices: [Price!] @derivedFrom(field: "token")
+  hooks: [Hook!] @derivedFrom(field: "token")
   mintBurnTxs: [MintBurnEntity!] @derivedFrom(field: "token")
   members: [Member!] @derivedFrom(field: "token")
+}
+
+type Hook @entity {
+  id: ID!
+  token: TokenEntity!
+  data: Bytes!
+  encoder: String!
+  name: String!
+  addr: Bytes!
 }
 
 type TokenUpgradeHistory @entity {
@@ -121,4 +132,11 @@ type MintBurnEntity @entity {
   tvl: BigDecimal!
   tradeVolumes: BigDecimal!
   token: TokenEntity!
+}
+
+type HookEntity @entity {
+  id: ID!
+  name: String!
+  addr: Bytes!
+  encoder: String!
 }
