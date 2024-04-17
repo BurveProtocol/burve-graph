@@ -47,7 +47,8 @@ export function updatePrice(
   currentPrice: BigDecimal,
   ethValue: BigDecimal,
   lastPrice: BigDecimal,
-  nativeTokenAmount: BigDecimal
+  raisingTokenAmount: BigDecimal,
+  tokenAmount: BigDecimal
 ): void {
   const epoch = (u64(timestamp) / u64(timegap));
   const id = tokenId + "|" + epoch.toString();
@@ -76,6 +77,7 @@ export function updatePrice(
     price.minPrice = price.openPrice;
   }
   price.tokenTvl = ethValue;
-  price.volume = price.volume.plus(nativeTokenAmount);
+  price.volume = price.volume.plus(raisingTokenAmount);
+  price.baseVolume = price.baseVolume.plus(tokenAmount);
   price.save();
 }

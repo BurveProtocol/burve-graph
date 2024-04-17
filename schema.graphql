@@ -17,6 +17,7 @@ type PlatformEntity @entity {
   mintTax: BigInt!
   burnTax: BigInt!
   klines: [String!]
+  startBlock: BigInt!
 }
 
 type TokenType @entity {
@@ -101,6 +102,7 @@ type Price @entity {
   # token: Bytes!
   token: TokenEntity!
   volume: BigDecimal!
+  baseVolume: BigDecimal!
 }
 type Member @entity {
   id: ID!
@@ -139,4 +141,37 @@ type HookEntity @entity {
   name: String!
   addr: Bytes!
   encoder: String!
+}
+
+type Swap @entity {
+  "transaction hash + \"-\" + index in swaps Transaction array"
+  id: ID!
+  "from token amount"
+  fromAmount: BigInt!
+  "from token amount"
+  toAmount: BigInt!
+  "transaction timestamp"
+  timestamp: BigInt!
+  "trading pair"
+  pair: Pair
+}
+
+type Token @entity {
+  "token address"
+  id: ID!
+  "total trade volume"
+  tradeVolume: BigDecimal!
+  "token symbol"
+  symbol: String!
+  "token decimals"
+  decimals: BigInt!
+}
+
+type Pair @entity {
+  "pool address"
+  id: ID!
+  "base token"
+  fromToken: Token!
+  "quote token"
+  toToken: Token!
 }

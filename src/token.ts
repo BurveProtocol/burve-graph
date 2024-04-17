@@ -26,6 +26,7 @@ import { CountAndSave, GetCount } from "./dealers/counter";
 import { dealTokenMember } from "./dealers/member";
 import { Member, MintBurnEntity, PlatformEntity, TokenEntity } from "../generated/schema";
 import { formatEther, klines, ONE_BI, ZERO_BD, ZERO_BI } from "./const";
+import { HandleSwap, HandleTokenVolume } from "./utils";
 
 export function handleApproval(event: Approval): void { }
 
@@ -63,13 +64,19 @@ export function handleLogBurned(event: LogBurned): void {
   tokenEntity.treasuryFee = tokenEntity.treasuryFee.plus(mintBurnEntity.projectFee);
   tokenEntity.txCount = tokenEntity.txCount.plus(ONE_BI);
   const lastPrice = tokenEntity.currentPrice;
-  tokenEntity.currentPrice = formatEther(erc20Abi.price());
+  const price = erc20Abi.try_price();
+  if (!price.reverted) {
+    tokenEntity.currentPrice = formatEther(price.value);
+  }
   tokenEntity.supply = tokenEntity.supply.minus(mintBurnEntity.erc20Amount);
-  tokenEntity.marketCap = tokenEntity.currentPrice.times(tokenEntity.supply).div(BigInt.fromI32(2).toBigDecimal());
+  tokenEntity.marketCap = tokenEntity.currentPrice.times(tokenEntity.supply);
   dealTradeVolume(tokenEntity, event.block.timestamp, mintBurnEntity.nativeAmount, removeValue, false);
+  HandleTokenVolume(Address.fromBytes(tokenEntity.raisingToken), mintBurnEntity.nativeAmount);
+  HandleTokenVolume(Address.fromBytes(tokenEntity.addr), mintBurnEntity.erc20Amount);
+  HandleSwap(Address.fromBytes(tokenEntity.addr), event.params.returnAmount, event.params.daoTokenAmount, event.block.timestamp, event.transaction.hash)
   const timestamp = event.block.timestamp.toI32()
   for (let i = 0; i < klines.length; i++) {
-    updatePrice(timestamp, klines[i], tokenEntity.id, tokenEntity.currentPrice, tokenEntity.lockValue, lastPrice, mintBurnEntity.nativeAmount)
+    updatePrice(timestamp, klines[i], tokenEntity.id, tokenEntity.currentPrice, tokenEntity.lockValue, lastPrice, mintBurnEntity.nativeAmount, mintBurnEntity.erc20Amount)
   }
   tokenEntity.save();
   platformEntity.save();
@@ -119,9 +126,12 @@ export function handleLogMint(event: LogMint): void {
   mintBurnEntity.nativeAmount = lockValue;
   mintBurnEntity.token = tokenEntity.id;
   const lastPrice = tokenEntity.currentPrice;
-  tokenEntity.currentPrice = formatEther(erc20Abi.price());
+  const price = erc20Abi.try_price();
+  if (!price.reverted) {
+    tokenEntity.currentPrice = formatEther(price.value);
+  }
   tokenEntity.supply = tokenEntity.supply.plus(mintBurnEntity.erc20Amount);
-  tokenEntity.marketCap = tokenEntity.currentPrice.times(tokenEntity.supply).div(BigInt.fromI32(2).toBigDecimal());
+  tokenEntity.marketCap = tokenEntity.currentPrice.times(tokenEntity.supply);
   tokenEntity.lockValue = tokenEntity.lockValue.plus(lockValue);
   tokenEntity.treasuryFee = tokenEntity.treasuryFee.plus(mintBurnEntity.projectFee);
   tokenEntity.txCount = tokenEntity.txCount.plus(ONE_BI);
@@ -133,10 +143,13 @@ export function handleLogMint(event: LogMint): void {
     amountWithFee,
     true
   );
+  HandleTokenVolume(Address.fromBytes(tokenEntity.raisingToken), mintBurnEntity.nativeAmount);
+  HandleTokenVolume(Address.fromBytes(tokenEntity.addr), mintBurnEntity.erc20Amount);
+  HandleSwap(Address.fromBytes(tokenEntity.addr), event.params.lockAmount, event.params.daoTokenAmount, event.block.timestamp, event.transaction.hash)
   const timestamp = event.block.timestamp.toI32()
 
   for (let i = 0; i < klines.length; i++) {
-    updatePrice(timestamp, klines[i], tokenEntity.id, tokenEntity.currentPrice, tokenEntity.lockValue, lastPrice, amountWithFee)
+    updatePrice(timestamp, klines[i], tokenEntity.id, tokenEntity.currentPrice, tokenEntity.lockValue, lastPrice, amountWithFee, mintBurnEntity.erc20Amount)
   }
   tokenEntity.save();
   platformEntity.save();

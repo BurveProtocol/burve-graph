@@ -29,7 +29,7 @@ export function dealTokenMember(token: TokenEntity, member: Address, balanceOf: 
     }
   } else {
     let memberEntity = Member.load(memPairId);
-    if (memberEntity && Address.fromBytes(token.admin) != member) {
+    if (memberEntity) {
       store.remove("Member", memPairId);
       token.memberCount = token.memberCount.minus(ONE_BI);
       CountAndSave("MemberCount", ONE_BD.neg());

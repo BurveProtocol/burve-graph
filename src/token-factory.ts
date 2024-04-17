@@ -25,7 +25,8 @@ import {
   TokenUpgradeHistory,
   TokenType,
   HookEntity,
-  Hook
+  Hook,
+  Pair
 } from "../generated/schema";
 import { Token } from "../generated/factory/Token";
 import { Hook as HookContract } from "../generated/factory/Hook";
@@ -35,6 +36,9 @@ import { CountAndSave } from "./dealers/counter";
 import { getBondingCurveParams } from "./dealers/bondingcurve";
 import { dealTokenMember } from "./dealers/member";
 import { store } from "@graphprotocol/graph-ts";
+import { HandleToken } from "./utils";
+
+
 
 export function handleInitialized(event: Initialized): void {
   let platformEntity = new PlatformEntity(event.address.toHex());
@@ -47,6 +51,7 @@ export function handleInitialized(event: Initialized): void {
   platformEntity.route = factoryAbi.try_getRoute().value;
   platformEntity.mintTax = taxRateResult.value.value0;
   platformEntity.burnTax = taxRateResult.value.value1;
+  platformEntity.startBlock = event.block.number;
   const arr: string[] = []
   for (let i = 0; i < klines.length; i++) {
     arr.push(getTypeFromGap(u32(klines[i])))
@@ -84,6 +89,9 @@ export function handleLogRouteChanged(event: LogRouteChanged): void {
 }
 
 export function handleLogTokenDeployed(event: LogTokenDeployed): void {
+  if (event.block.timestamp.toU64() <= 1710241200) {
+    return
+  }
   let tokenEntity = new TokenEntity(event.params.deployedAddr.toHex());
   CountAndSave("DaoCount");
   let erc20Abi = Token.bind(event.params.deployedAddr);
@@ -127,6 +135,12 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
   } else {
     tokenEntity.raisingToken = Address.zero();
   }
+  const fromToken = HandleToken(Address.fromBytes(tokenEntity.raisingToken));
+  const toToken = HandleToken(Address.fromBytes(tokenEntity.addr));
+  const pair = new Pair(tokenEntity.addr.toHex());
+  pair.fromToken = fromToken.id;
+  pair.toToken = toToken.id;
+  pair.save();
   tokenEntity.memberCount = ZERO_BI;
   tokenEntity.treasuryFee = ZERO_BD;
   tokenEntity.txCount = ZERO_BI;
@@ -136,7 +150,7 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
   let platformEntity = PlatformEntity.load(event.address.toHex())!;
   tokenEntity.factory = event.address;
   platformEntity.save();
-  dealTokenMember(tokenEntity, admin, ONE_BI);
+  // dealTokenMember(tokenEntity, admin, ONE_BI);
   tokenEntity.save();
 }
 
@@ -195,9 +209,9 @@ export function handleRoleAdminChanged(event: RoleAdminChanged): void { }
 export function handleRoleGranted(event: RoleGranted): void { }
 
 export function handleRoleRevoked(event: RoleRevoked): void {
-  
- }
-export function handleLogHookWhiteListed(event: LogHookWhiteListed): void { 
+
+}
+export function handleLogHookWhiteListed(event: LogHookWhiteListed): void {
   let hookCa = HookContract.bind(event.params.hook);
   let hook = new HookEntity(event.params.hook.toHex());
   hook.name = hookCa.try_hookName().value;
@@ -208,13 +222,13 @@ export function handleLogHookWhiteListed(event: LogHookWhiteListed): void {
 
 export function handleLogHookBlackListed(event: LogHookBlackListed): void {
   store.remove("HookEntity", event.params.hook.toHex());
- }
-export function handleLogHookRegistered(event: LogHookRegistered): void { 
-  const hookEntity=HookEntity.load(event.params.hook.toHex())
-  if(!hookEntity){
+}
+export function handleLogHookRegistered(event: LogHookRegistered): void {
+  const hookEntity = HookEntity.load(event.params.hook.toHex())
+  if (!hookEntity) {
     return
   }
-  let hook = new Hook(event.params.token.toHex()+"|"+event.params.hook.toHex());
+  let hook = new Hook(event.params.token.toHex() + "|" + event.params.hook.toHex());
   hook.token = event.params.token.toHex()
   hook.addr = event.params.hook;
   hook.data = event.params.data;
