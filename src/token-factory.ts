@@ -1,4 +1,4 @@
-import { Address, Bytes, dataSource } from "@graphprotocol/graph-ts";
+import { Address, Bytes, dataSource, ethereum } from "@graphprotocol/graph-ts";
 import {
   TokenFactory,
   Initialized,
@@ -26,19 +26,24 @@ import {
   TokenType,
   HookEntity,
   Hook,
-  Pair
+  Pair,
+  BlockInfo
 } from "../generated/schema";
 import { Token } from "../generated/factory/Token";
 import { Hook as HookContract } from "../generated/factory/Hook";
 import { token } from "../generated/templates";
 import { formatEther, getTypeFromGap, klines, ONE_BI, ZERO_BD, ZERO_BI } from "./const";
 import { CountAndSave } from "./dealers/counter";
-import { getBondingCurveParams } from "./dealers/bondingcurve";
-import { dealTokenMember } from "./dealers/member";
+import { getBondingCurveParams, handlePrice } from "./dealers/bondingcurve";
 import { store } from "@graphprotocol/graph-ts";
 import { HandleToken } from "./utils";
 
-
+export function handleBlock(b: ethereum.Block): void {
+  let block = new BlockInfo(b.timestamp.toHex());
+  block.blockNum = b.number;
+  block.timestamp = b.timestamp
+  block.save()
+}
 
 export function handleInitialized(event: Initialized): void {
   let platformEntity = new PlatformEntity(event.address.toHex());
@@ -105,11 +110,7 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
   tokenEntity.tokenType = event.params.tokenType;
   tokenEntity.bondingCurveType = event.params.bondingCurveType;
   tokenEntity.supply = ZERO_BD;
-  let price = erc20Abi.try_price();
-  if (!price.reverted) tokenEntity.currentPrice = formatEther(price.value);
-  else tokenEntity.currentPrice = ZERO_BD;
-  let decimal = erc20Abi.try_decimals();
-  if (!decimal.reverted) tokenEntity.decimal = decimal.value;
+  tokenEntity.decimal = 18;
   tokenEntity.index = event.params.tokenId;
   tokenEntity.doomsDays = false;
   tokenEntity.destoryed = false;
@@ -130,7 +131,7 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
     if (raising.value != Address.zero()) {
       let rasingTokenAbi = Token.bind(raising.value);
       const baseDecimal = rasingTokenAbi.try_decimals();
-      if (!decimal.reverted) tokenEntity.baseDecimal = baseDecimal.value;
+      if (!baseDecimal.reverted) tokenEntity.baseDecimal = baseDecimal.value;
     }
   } else {
     tokenEntity.raisingToken = Address.zero();
@@ -144,8 +145,12 @@ export function handleLogTokenDeployed(event: LogTokenDeployed): void {
   tokenEntity.memberCount = ZERO_BI;
   tokenEntity.treasuryFee = ZERO_BD;
   tokenEntity.txCount = ZERO_BI;
+  tokenEntity.lastTxTimestamp = event.block.timestamp
   const parameterData = erc20Abi.try_getParameters().value;
   tokenEntity.params = getBondingCurveParams(erc20Abi.try_getBondingCurve().value, parameterData);
+  tokenEntity.initHash = event.transaction.hash
+  tokenEntity.initPrice = handlePrice(tokenEntity);
+  tokenEntity.currentPrice = handlePrice(tokenEntity);
   token.create(event.params.deployedAddr);
   let platformEntity = PlatformEntity.load(event.address.toHex())!;
   tokenEntity.factory = event.address;

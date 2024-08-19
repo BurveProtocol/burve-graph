@@ -2,7 +2,7 @@ type CounterEntity @entity {
   "Counter"
   id: ID!
   count: BigDecimal!
-  type: String!
+  type: String! # token.addr+ "|TradeVolume"
   timestamp: BigInt!
 }
 
@@ -18,6 +18,12 @@ type PlatformEntity @entity {
   burnTax: BigInt!
   klines: [String!]
   startBlock: BigInt!
+}
+
+type BlockInfo @entity {
+  id: ID!
+  blockNum: BigInt!
+  timestamp: BigInt!
 }
 
 type TokenType @entity {
@@ -43,6 +49,8 @@ type TokenEntity @entity {
   symbol: String!
   metaUri: String!
   supply: BigDecimal!
+  initPrice: BigDecimal!
+  initHash: Bytes!
   tokenType: String!
   bondingCurveType: String!
   raisingToken: Bytes!
@@ -64,6 +72,7 @@ type TokenEntity @entity {
   baseDecimal: Int8!
   txCount: BigInt!
   createTimestamp: BigInt!
+  lastTxTimestamp: BigInt!
   prices: [Price!] @derivedFrom(field: "token")
   hooks: [Hook!] @derivedFrom(field: "token")
   mintBurnTxs: [MintBurnEntity!] @derivedFrom(field: "token")

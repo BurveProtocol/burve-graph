@@ -15,7 +15,24 @@ export function getDayTimestamp(timestamp: number): number {
   let hourIndex = parseInt((timestamp / day).toString()); // get unique hour within unix history
   return hourIndex * day; // want the rounded effect
 }
-export const klines = [1 * second, 5 * second, 15 * second, 30 * second, 1 * mintue, 3 * mintue, 5 * mintue, 15 * mintue, 30 * mintue, hour, 2 * hour, 4 * hour, 8 * hour, day, 30 * day, 90 * day]
+export const klines = [
+  // 1 * second,
+  // 5 * second,
+  15 * second,
+  // 30 * second,
+  1 * mintue,
+  // 3 * mintue,
+  // 5 * mintue,
+  // 15 * mintue,
+  // 30 * mintue,
+  hour,
+  // 2 * hour,
+  // 4 * hour,
+  // 8 * hour,
+  day,
+  // 30 * day,
+  // 90 * day
+]
 export function getTypeFromGap(gap: u32): string {
   switch (gap) {
     case 1 * second: return "1s"

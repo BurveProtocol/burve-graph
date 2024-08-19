@@ -1,6 +1,6 @@
-import { Address, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
-import { ONE_BI, ZERO_BI } from "../const";
-import { CounterEntity } from "../../generated/schema";
+import { Address, BigDecimal, BigInt, Bytes, ethereum, json } from "@graphprotocol/graph-ts";
+import { formatEther } from "../const";
+import { TokenEntity } from "../../generated/schema";
 import { BondingSwapCalculator } from "../../generated/factory/BondingSwapCalculator";
 
 export function getBondingCurveParams(curve: Address, paramsData: Bytes): string {
@@ -22,4 +22,25 @@ export function getBondingCurveParams(curve: Address, paramsData: Bytes): string
     return res;
   }
   return "";
+}
+
+export function handlePrice(tokenEntity: TokenEntity): BigDecimal {
+  const p = json.fromString(tokenEntity.params).toObject()
+  const type = p.get("type")!.toString()
+  let params = p.get("params")!.toObject()
+  let price = BigDecimal.zero()
+  if (type == "exponential") {
+    const a = formatEther(BigInt.fromString(params!.get("a")!.toString())!)
+    const b = formatEther(BigInt.fromString(params!.get("b")!.toString())!)
+    const e_index = tokenEntity.supply.div(b);
+    const y = BigDecimal.fromString(Math.exp(parseFloat(e_index.toString())).toString());
+    price = y.times(a);
+  }
+  else if (type == "linear") {
+    const k = formatEther(BigInt.fromString(params!.get("k")!.toString())!)
+    const p = formatEther(BigInt.fromString(params!.get("p")!.toString())!)
+    price = tokenEntity.supply.times(k).plus(p);
+  }
+  else if (type == "squareroot") { }
+  return price
 }

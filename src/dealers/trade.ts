@@ -13,31 +13,31 @@ export function dealTradeVolume(
   nativeTokenAmountWithFee: BigDecimal,
   isMint: bool
 ): void {
-  let raisingToken = token.raisingToken.toHex();
-  let timestamp = blockTimeStamp.toI32();
-  let hourTimestamp = getHourTimestamp(timestamp)
-    .toString()
-    .replace(".0", "");
-  let dayTimeStamp = getDayTimestamp(timestamp)
-    .toString()
-    .replace(".0", "");
-  CountAndSave("TradeVolumeByHour", nativeTokenAmountWithoutFee, BigInt.fromString(hourTimestamp));
-  CountAndSave("TradeVolumeByDay", nativeTokenAmountWithoutFee, BigInt.fromString(dayTimeStamp));
-  CountAndSave(raisingToken + "|TradeVolumeByHour", nativeTokenAmountWithoutFee, BigInt.fromString(hourTimestamp));
-  CountAndSave(raisingToken + "|TradeVolumeByDay", nativeTokenAmountWithoutFee, BigInt.fromString(dayTimeStamp));
-  CountAndSave(raisingToken + "|TradeVolume", nativeTokenAmountWithoutFee);
-  CountAndSave(token.addr.toHex() + "|TradeVolume", nativeTokenAmountWithoutFee);
-  let amount = nativeTokenAmountWithoutFee;
-  if (!isMint) {
-    amount = nativeTokenAmountWithFee.neg();
-  }
-  const tvlCounter = CountAndSave("Tvl", amount);
-  CountAndSaveWithDefaultValue("TvlByHour", tvlCounter.count, amount, BigInt.fromString(hourTimestamp));
-  CountAndSaveWithDefaultValue("TvlByDay", tvlCounter.count, amount, BigInt.fromString(dayTimeStamp));
+  // let raisingToken = token.raisingToken.toHex();
+  // let timestamp = blockTimeStamp.toI32();
+  // let hourTimestamp = getHourTimestamp(timestamp)
+  //   .toString()
+  //   .replace(".0", "");
+  // let dayTimeStamp = getDayTimestamp(timestamp)
+  //   .toString()
+  //   .replace(".0", "");
+  // CountAndSave("TradeVolumeByHour", nativeTokenAmountWithoutFee, BigInt.fromString(hourTimestamp));
+  // CountAndSave("TradeVolumeByDay", nativeTokenAmountWithoutFee, BigInt.fromString(dayTimeStamp));
+  // CountAndSave(raisingToken + "|TradeVolumeByHour", nativeTokenAmountWithoutFee, BigInt.fromString(hourTimestamp));
+  // CountAndSave(raisingToken + "|TradeVolumeByDay", nativeTokenAmountWithoutFee, BigInt.fromString(dayTimeStamp));
+  // CountAndSave(raisingToken + "|TradeVolume", nativeTokenAmountWithoutFee);
+  CountAndSave(token.addr.toHex() + "|TradeVolume", nativeTokenAmountWithFee);
+  // let amount = nativeTokenAmountWithoutFee;
+  // if (!isMint) {
+  //   amount = nativeTokenAmountWithFee.neg();
+  // }
+  // const tvlCounter = CountAndSave("Tvl", amount);
+  // CountAndSaveWithDefaultValue("TvlByHour", tvlCounter.count, amount, BigInt.fromString(hourTimestamp));
+  // CountAndSaveWithDefaultValue("TvlByDay", tvlCounter.count, amount, BigInt.fromString(dayTimeStamp));
 
-  const tokenTvlCounter = CountAndSave(raisingToken + "|Tvl", amount);
-  CountAndSaveWithDefaultValue(raisingToken + "|TvlByHour", tokenTvlCounter.count, amount, BigInt.fromString(hourTimestamp));
-  CountAndSaveWithDefaultValue(raisingToken + "|TvlByDay", tokenTvlCounter.count, amount, BigInt.fromString(dayTimeStamp));
+  // const tokenTvlCounter = CountAndSave(raisingToken + "|Tvl", amount);
+  // CountAndSaveWithDefaultValue(raisingToken + "|TvlByHour", tokenTvlCounter.count, amount, BigInt.fromString(hourTimestamp));
+  // CountAndSaveWithDefaultValue(raisingToken + "|TvlByDay", tokenTvlCounter.count, amount, BigInt.fromString(dayTimeStamp));
 }
 
 export function updatePrice(
@@ -58,10 +58,11 @@ export function updatePrice(
     price.token = tokenId;
     price.maxPrice = ZERO_BD;
     price.minPrice = BigInt.fromU64(u64.MAX_VALUE).toBigDecimal();
-    price.timestamp = BigInt.fromU64(epoch*u64(timegap));
+    price.timestamp = BigInt.fromU64(epoch * u64(timegap));
     price.type = getTypeFromGap(u32(timegap))
     price.openPrice = lastPrice;
     price.volume = ZERO_BD
+    price.baseVolume = ZERO_BD
   }
   price.closePrice = currentPrice;
   if (price.maxPrice < price.closePrice) {

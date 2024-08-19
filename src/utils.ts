@@ -16,7 +16,11 @@ export function HandleToken(tokenAddr: Address): Token {
         token = new Token(tokenAddr.toHex());
         let erc20Abi = TokenContract.bind(tokenAddr);
         let symbol = erc20Abi.try_symbol();
-        if (!symbol.reverted) token.symbol = symbol.value;
+        if (!symbol.reverted) {
+            token.symbol = symbol.value
+        } else {
+            return token
+        };
         let decimal = erc20Abi.try_decimals();
         if (!decimal.reverted) token.decimals = BigInt.fromI32(decimal.value);
         token.tradeVolume = BigDecimal.zero();
